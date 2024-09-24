@@ -1,5 +1,5 @@
 import md from "markdown-it";
-import shiki from "@shikijs/markdown-it";
+// import shiki from "@shikijs/markdown-it";
 
 // const defaultPlugins = [
 //   "markdown-it-abbr",
@@ -27,15 +27,15 @@ const renderer = md({
   typographer: true,
 });
 
-(async () => {
-  const shikiRenderer = await shiki({
-    themes: {
-      light: "vitesse-light",
-      dark: "vitesse-dark",
-    },
-  });
-  renderer.use(shikiRenderer);
-})();
+// (async () => {
+//   const shikiRenderer = await shiki({
+//     themes: {
+//       light: "vitesse-light",
+//       dark: "vitesse-dark",
+//     },
+//   });
+//   renderer.use(shikiRenderer);
+// })();
 
 export function renderMarkdown(markdown: string, inline: boolean = true) {
   if (!inline) return renderer.render(markdown);

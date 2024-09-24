@@ -160,23 +160,6 @@ export class JSONCompletion {
       debug.log("xxx", "isPropertyNameNode", node);
       const parent = node.parent;
       if (parent) {
-        // get value node from parent
-        const valueNode = getChildValueNode(parent, this.mode);
-        addValue =
-          !valueNode ||
-          (valueNode.name === TOKENS.INVALID &&
-            valueNode.from - valueNode.to === 0) ||
-          // TODO: Verify this doesn't break anything else
-          (valueNode.parent
-            ? getChildrenNodes(valueNode.parent).length <= 1
-            : false);
-        debug.log(
-          "xxx",
-          "addValue",
-          addValue,
-          getChildValueNode(parent, this.mode),
-          node
-        );
         // find object node
         node = getClosestNode(parent, TOKENS.OBJECT, this.mode) ?? null;
       }
@@ -370,6 +353,15 @@ export class JSONCompletion {
       : propertySchema;
 
     let resultText = this.getInsertTextForPropertyName(key, rawWord);
+
+    console.log(
+      "autocomplete resulttext",
+      resultText,
+      "addValue",
+      addValue,
+      "propertySchema",
+      propertySchema
+    );
 
     if (!addValue) {
       return resultText;
