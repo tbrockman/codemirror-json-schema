@@ -347,6 +347,8 @@ export class JSONCompletion {
     rawWord: string,
     propertySchema?: JSONSchema7Definition
   ) {
+    // TODO: determine appropriate separator based on mode
+    const separatorAfter = ",";
     // expand schema property if it is a reference
     propertySchema = propertySchema
       ? this.expandSchemaProperty(propertySchema, this.schema!)
@@ -373,25 +375,13 @@ export class JSONCompletion {
     if (typeof propertySchema === "object") {
       if (typeof propertySchema.default !== "undefined") {
         if (!value) {
-          value = this.getInsertTextForGuessedValue(propertySchema.default, "");
+          value = this.getInsertTextForGuessedValue(
+            propertySchema.default,
+            separatorAfter
+          );
         }
         nValueProposals++;
       } else {
-        if (propertySchema.enum) {
-          if (!value && propertySchema.enum.length === 1) {
-            value = this.getInsertTextForGuessedValue(
-              propertySchema.enum[0],
-              ""
-            );
-          }
-          nValueProposals += propertySchema.enum.length;
-        }
-        if (typeof propertySchema.const !== "undefined") {
-          if (!value) {
-            value = this.getInsertTextForGuessedValue(propertySchema.const, "");
-          }
-          nValueProposals++;
-        }
         if (
           Array.isArray(propertySchema.examples) &&
           propertySchema.examples.length
@@ -399,10 +389,28 @@ export class JSONCompletion {
           if (!value) {
             value = this.getInsertTextForGuessedValue(
               propertySchema.examples[0],
-              ""
+              separatorAfter
             );
           }
           nValueProposals += propertySchema.examples.length;
+        }
+        if (propertySchema.enum) {
+          if (!value && propertySchema.enum.length === 1) {
+            value = this.getInsertTextForGuessedValue(
+              propertySchema.enum[0],
+              separatorAfter
+            );
+          }
+          nValueProposals += propertySchema.enum.length;
+        }
+        if (typeof propertySchema.const !== "undefined") {
+          if (!value) {
+            value = this.getInsertTextForGuessedValue(
+              propertySchema.const,
+              separatorAfter
+            );
+          }
+          nValueProposals++;
         }
         if (value === undefined && nValueProposals === 0) {
           let type = Array.isArray(propertySchema.type)
@@ -417,37 +425,37 @@ export class JSONCompletion {
           }
           switch (type) {
             case "boolean":
-              value = "#{}";
+              value = "#{true}" + separatorAfter;
               break;
             case "string":
-              value = this.getInsertTextForString("");
+              value = this.getInsertTextForString("") + separatorAfter;
               break;
             case "object":
               switch (this.mode) {
                 case MODES.JSON5:
-                  value = "{#{}}";
+                  value = "{#{}}" + separatorAfter;
                   break;
                 case MODES.YAML:
-                  value = "#{}";
+                  value = "#{}" + separatorAfter;
                   break;
                 default:
-                  value = "{#{}}";
+                  value = "{#{}}" + separatorAfter;
                   break;
               }
               break;
             case "array":
-              value = "[#{}]";
+              value = "[#{}]" + separatorAfter;
               break;
             case "number":
             case "integer":
-              value = "#{0}";
+              value = "#{0}" + separatorAfter;
               break;
             case "null":
-              value = "#{null}";
+              value = "#{null}" + separatorAfter;
               break;
             default:
               // always advance the cursor after completing a property
-              value = "#{}";
+              value = "#{}" + separatorAfter;
               break;
           }
         }
@@ -464,6 +472,15 @@ export class JSONCompletion {
       );
       value = "#{}";
     }
+
+    console.log(
+      "insert text returned",
+      resultText,
+      "+",
+      value,
+      "nValueProposals",
+      nValueProposals
+    );
 
     return resultText + value;
   }
@@ -497,7 +514,7 @@ export class JSONCompletion {
   // TODO: Is this actually working?
   private getInsertTextForGuessedValue(
     value: any,
-    separatorAfter = ""
+    separatorAfter = ","
   ): string {
     switch (typeof value) {
       case "object":
