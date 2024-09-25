@@ -25,6 +25,7 @@ export function parseJSON5DocumentState(state: EditorState) {
   // }
   // const pointers = getJsonPointers(state, MODES.JSON5);
   // return { data, pointers };
+  return {} as any;
 }
 
 /**
@@ -34,7 +35,7 @@ export function parseJSON5DocumentState(state: EditorState) {
 export function parseJSON5Document(jsonString: string) {
   const state = EditorState.create({
     doc: jsonString,
-    extensions: [json5mode()],
+    // extensions: [json5mode()],
   });
   return parseJSON5DocumentState(state);
 }

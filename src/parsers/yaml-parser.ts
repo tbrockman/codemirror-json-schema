@@ -20,4 +20,5 @@ export function parseYAMLDocumentState(state: EditorState) {
   // } catch {}
   // const pointers = getJsonPointers(state, MODES.YAML);
   // return { data, pointers };
+  return {} as any;
 }
