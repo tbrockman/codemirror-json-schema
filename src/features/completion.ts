@@ -25,6 +25,7 @@ import {
 import { getJSONSchema } from "./state";
 import { Draft07, isJsonError } from "json-schema-library";
 import {
+  getJsonPointerAt,
   jsonPointerForPosition,
   resolveTokenName,
 } from "../utils/json-pointers";
@@ -254,6 +255,11 @@ export class JSONCompletion {
       TOKENS.PROPERTY,
       this.mode
     );
+    console.log(
+      "testing without pos",
+      ctx.state.doc.sliceString(0, ctx.pos - 1) +
+        ctx.state.doc.sliceString(ctx.pos + 1, ctx.state.doc.length)
+    );
     debug.log("xxx", "getPropertyCompletions", node, ctx, properties);
     properties.forEach((p) => {
       const key = getWord(
@@ -355,15 +361,6 @@ export class JSONCompletion {
       : propertySchema;
 
     let resultText = this.getInsertTextForPropertyName(key, rawWord);
-
-    console.log(
-      "autocomplete resulttext",
-      resultText,
-      "addValue",
-      addValue,
-      "propertySchema",
-      propertySchema
-    );
 
     if (!addValue) {
       return resultText;
@@ -472,16 +469,6 @@ export class JSONCompletion {
       );
       value = "#{}";
     }
-
-    console.log(
-      "insert text returned",
-      resultText,
-      "+",
-      value,
-      "nValueProposals",
-      nValueProposals
-    );
-
     return resultText + value;
   }
   private getInsertTextForPropertyName(key: string, rawWord: string) {
