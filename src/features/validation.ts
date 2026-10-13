@@ -1,6 +1,10 @@
 import type { EditorView, ViewUpdate } from "@codemirror/view";
 import { type Diagnostic } from "@codemirror/lint";
-import { type JsonError, type SchemaNode } from "json-schema-library";
+import {
+  type JsonAnnotation,
+  type JsonError,
+  type SchemaNode,
+} from "json-schema-library";
 
 import { getCompiledSchema, schemaStateField } from "./state";
 import { joinWithOr } from "../utils/formatting";
@@ -46,7 +50,10 @@ const getErrorPath = (error: JsonError): string => {
 
 export interface JSONValidationOptions {
   mode?: JSONMode;
-  formatError?: (error: JsonError) => string;
+  /**
+   * Customize the message of a validation error. Return `undefined` to use the default message.
+   */
+  formatError?: (error: JsonError) => string | undefined;
   jsonParser?: DocumentParser;
 }
 
@@ -158,17 +165,19 @@ export class JSONValidation {
     if (json.data == null) return [];
 
     let errors: JsonError[] = [];
+    let annotations: JsonAnnotation[] = [];
     try {
-      errors = this.schema.validate(json.data).errors;
+      ({ errors, annotations } = this.schema.validate(json.data));
     } catch (err) {
       debug.log("xxx", "validation threw", err);
     }
     debug.log("xxx", "validation errors", errors, json.data);
-    if (!errors.length) return [];
+    const diagnostics = this.getDeprecationWarnings(annotations, json.pointers);
+    if (!errors.length) return diagnostics;
     // reduce() because we want to filter out errors that don't have a pointer
     return errors.reduce<Diagnostic[]>((acc, error) => {
       const pushRoot = () => {
-        const errorString = this.rewriteError(error);
+        const errorString = this.formatError(error);
         acc.push({
           from: 0,
           to: 0,
@@ -194,7 +203,7 @@ export class JSONValidation {
       } else if (pointer) {
         // if the error is a property error, use the key position
         const isKeyError = positionalErrors.includes(error.code as string);
-        const errorString = this.rewriteError(error);
+        const errorString = this.formatError(error);
         const from =
           isKeyError && pointer.keyFrom ? pointer.keyFrom : pointer.valueFrom;
         const to =
@@ -218,6 +227,47 @@ export class JSONValidation {
         pushRoot();
       }
       return acc;
-    }, []);
+    }, diagnostics);
+  }
+
+  private formatError(error: JsonError): string {
+    return this.options?.formatError?.(error) ?? this.rewriteError(error);
+  }
+
+  // `deprecated: true` (draft 2019-09+) is reported as a warning on the property key
+  private getDeprecationWarnings(
+    annotations: JsonAnnotation[],
+    pointers: Map<string, Partial<JSONPointerData>>,
+  ): Diagnostic[] {
+    const warnings: Diagnostic[] = [];
+    for (const annotation of annotations) {
+      if (annotation.code !== "deprecated-warning") continue;
+      const errorPath = getErrorPath(annotation as unknown as JsonError);
+      const pointer = pointers.get(errorPath);
+      if (!pointer) continue;
+      const from = pointer.keyFrom ?? pointer.valueFrom;
+      const to = pointer.keyTo ?? pointer.valueTo;
+      if (from === undefined || to === undefined) continue;
+      const key = errorPath.split("/").pop();
+      const schema = annotation.data?.schema as
+        { deprecationMessage?: unknown } | undefined;
+      const message =
+        typeof schema?.deprecationMessage === "string"
+          ? schema.deprecationMessage
+          : `\`${key}\` is deprecated`;
+      warnings.push({
+        from,
+        to,
+        message,
+        severity: "warning",
+        source: this.schemaTitle,
+        renderMessage: () => {
+          const dom = el("div", {});
+          dom.innerHTML = renderMarkdown(message);
+          return dom;
+        },
+      });
+    }
+    return warnings;
   }
 }

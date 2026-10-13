@@ -28,6 +28,7 @@ export type {
 } from "./types";
 
 export * from "./parsers/json-parser";
+export { registerParser, type DocumentParser } from "./parsers";
 export * from "./utils/json-pointers";
 export { preloadMarkdownHighlighter } from "./utils/markdown";
 

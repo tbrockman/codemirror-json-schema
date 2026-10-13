@@ -39,6 +39,11 @@ import { el } from "../utils/dom";
 import { renderMarkdown } from "../utils/markdown";
 import { DocumentParser, getDefaultParser } from "../parsers";
 import { replacePropertiesDeeply } from "../utils/recordUtil";
+import {
+  getEnumValueDescription,
+  getSchemaDescription,
+  isDeprecated,
+} from "../utils/schema";
 
 class CompletionCollector {
   completions = new Map<string, Completion>();
@@ -341,9 +346,10 @@ export class JSONCompletion {
       if (properties) {
         Object.entries(properties).forEach(([key, value]) => {
           if (typeof value === "object") {
-            const description = value.description ?? "";
+            const description = getSchemaDescription(value);
             const type = value.type ?? "";
             const typeStr = Array.isArray(type) ? type.toString() : type;
+            const deprecated = isDeprecated(value);
             const completion: Completion = {
               // label is the unquoted key which will be displayed.
               label: key,
@@ -356,11 +362,13 @@ export class JSONCompletion {
                 value,
               ),
               type: "property",
-              detail: typeStr,
+              detail: deprecated ? `${typeStr} (deprecated)` : typeStr,
               info: () =>
                 el("div", {
                   inner: renderMarkdown(description),
                 }),
+              // rank deprecated properties below the others
+              ...(deprecated ? { boost: -1 } : {}),
             };
             collector.add(this.applySnippetCompletion(completion));
           }
@@ -854,8 +862,7 @@ export class JSONCompletion {
       collector.add({
         type: schema.type?.toString(),
         ...this.getAppliedValue(schema.const),
-
-        info: schema.description,
+        info: this.renderInfo(getSchemaDescription(schema)),
       });
     }
 
@@ -865,10 +872,18 @@ export class JSONCompletion {
         collector.add({
           type: schema.type?.toString(),
           ...this.getAppliedValue(enm),
-          info: schema.description,
+          info: this.renderInfo(getEnumValueDescription(schema, i)),
         });
       }
     }
+  }
+
+  // markdown info panel for a completion, omitted when there is no description
+  private renderInfo(description: string): Completion["info"] {
+    if (!description) {
+      return undefined;
+    }
+    return () => el("div", { inner: renderMarkdown(description) });
   }
 
   private addBooleanValueCompletion(

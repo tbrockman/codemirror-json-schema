@@ -7,6 +7,7 @@ import {
   testSchema4,
   testSchemaConditionalProperties,
   testSchemaConditionalPropertiesOnSameObject,
+  testSchemaAnnotations,
   testSchemaDraft2020,
   wrappedTestSchemaConditionalPropertiesOnSameObject,
 } from "./__fixtures__/schemas";
@@ -411,6 +412,55 @@ describe.each([
       },
     ],
     schema: testSchemaDraft2020,
+  },
+  {
+    name: "render markdownDescription and mark deprecated properties",
+    mode: MODES.JSON,
+    docs: ['{ "| }'],
+    expectedResults: [
+      {
+        type: "property",
+        detail: "string",
+        info: "rich description",
+        label: "md",
+        template: '"md": "#{}"',
+      },
+      {
+        type: "property",
+        detail: "string (deprecated)",
+        info: "use something else",
+        label: "legacy",
+        template: '"legacy": "#{}"',
+      },
+      {
+        type: "property",
+        detail: "string",
+        info: "",
+        label: "level",
+        template: '"level": #{}',
+      },
+    ],
+    schema: testSchemaAnnotations,
+  },
+  {
+    name: "use enumDescriptions for enum value completions",
+    mode: MODES.JSON,
+    docs: ['{ "level": "|" }'],
+    expectedResults: [
+      {
+        label: "low",
+        apply: '"low"',
+        info: "not much",
+        type: "string",
+      },
+      {
+        label: "high",
+        apply: '"high"',
+        info: "a lot",
+        type: "string",
+      },
+    ],
+    schema: testSchemaAnnotations,
   },
   {
     name: "not add a value when the property already has one",

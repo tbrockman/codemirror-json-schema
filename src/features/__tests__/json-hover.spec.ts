@@ -10,6 +10,7 @@ import { EditorView } from "@codemirror/view";
 import {
   testSchema,
   testSchema2,
+  testSchemaAnnotations,
   testSchemaDraft2020,
 } from "./__fixtures__/schemas";
 import { compileSchema } from "json-schema-library";
@@ -174,6 +175,28 @@ describe("JSONHover#getHoverTexts", () => {
       expected: {
         message: null,
         typeInfo: "object",
+      },
+    },
+    {
+      name: "markdownDescription",
+      mode: MODES.JSON,
+      doc: '{ "md": "x" }',
+      pos: 4,
+      schema: testSchemaAnnotations,
+      expected: {
+        message: "**rich** description",
+        typeInfo: "string",
+      },
+    },
+    {
+      name: "deprecated property",
+      mode: MODES.JSON,
+      doc: '{ "legacy": "x" }',
+      pos: 4,
+      schema: testSchemaAnnotations,
+      expected: {
+        message: "use something else",
+        typeInfo: "string (deprecated)",
       },
     },
   ])(

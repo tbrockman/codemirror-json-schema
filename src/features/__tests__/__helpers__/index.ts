@@ -1,9 +1,10 @@
 import { JSONMode } from "../../../types";
 import { MODES } from "../../../constants";
 import { JSONSchema7 } from "json-schema";
-import { jsonSchema } from "../../../json/bundled";
-import { json5Schema } from "../../../json5/bundled";
-import { yamlSchema } from "../../../yaml/bundled";
+import { jsonSchema } from "../../../index";
+// the json5 and yaml entry points also register their document parsers
+import { json5Schema } from "../../../json5/index";
+import { yamlSchema } from "../../../yaml/index";
 
 export const getExtensions = (mode: JSONMode, schema?: JSONSchema7) => {
   switch (mode) {

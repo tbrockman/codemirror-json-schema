@@ -278,3 +278,24 @@ export const testSchemaDraft2020 = {
     },
   },
 } as unknown as JSONSchema7;
+
+export const testSchemaAnnotations = {
+  type: "object",
+  properties: {
+    md: {
+      type: "string",
+      description: "plain description",
+      markdownDescription: "**rich** description",
+    },
+    legacy: {
+      type: "string",
+      description: "use something else",
+      deprecated: true,
+    },
+    level: {
+      type: "string",
+      enum: ["low", "high"],
+      enumDescriptions: ["not much", "a lot"],
+    },
+  },
+} as unknown as JSONSchema7;

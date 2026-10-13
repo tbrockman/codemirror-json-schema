@@ -276,6 +276,34 @@ describe("json-validation", () => {
       schema: testSchemaDraft2020,
     },
   ];
+  it("reports deprecated properties as warnings", () => {
+    const diagnostics = getErrors(
+      '{"old": "y", "email": "a@b.co"}',
+      MODES.JSON,
+      testSchemaDraft2020,
+    ).map(({ renderMessage, ...d }) => d);
+    expect(diagnostics).toEqual([
+      {
+        from: 1,
+        to: 6,
+        message: "`old` is deprecated",
+        severity: "warning",
+        source: "json-schema",
+      },
+    ]);
+  });
+
+  it("allows customizing error messages with formatError", () => {
+    const view = new EditorView({
+      doc: '{ "foo": 123 }',
+      extensions: [getExtensions(MODES.JSON, testSchema)],
+    });
+    const diagnostics = new JSONValidation({
+      formatError: (error) => `custom: ${error.code}`,
+    }).doValidation(view);
+    expect(diagnostics.map((d) => d.message)).toEqual(["custom: type-error"]);
+  });
+
   it.each([
     ...jsonSuite,
     // JSON5

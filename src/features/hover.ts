@@ -10,12 +10,13 @@ import { getCompiledSchema } from "./state";
 import { MODES } from "../constants";
 import { renderMarkdown } from "../utils/markdown";
 import { JSONSchema7Type } from "json-schema";
+import { getSchemaDescription, isDeprecated } from "../utils/schema";
 
 export type CursorData = { schema?: JsonSchema; pointer: string };
 
 export type FoundCursorData = Required<CursorData>;
 
-export type HoverTexts = { message: string; typeInfo: string };
+export type HoverTexts = { message: string | null; typeInfo: string };
 
 export type HoverOptions = {
   mode?: JSONMode;
@@ -156,7 +157,7 @@ export class JSONHover {
 
   public getHoverTexts(data: FoundCursorData, root: SchemaNode): HoverTexts {
     let typeInfo = "";
-    let message = null;
+    let message: string | null = null;
 
     const { schema } = data;
 
@@ -182,14 +183,18 @@ export class JSONHover {
       typeInfo = `\`enum\`: ${joinWithOr(schema.enum)}`;
     }
     if (schema.format) {
-      typeInfo += `\`format\`: ${schema.format}`;
+      typeInfo += `, \`format\`: ${schema.format}`;
     }
     if (schema.pattern) {
-      typeInfo += `\`pattern\`: ${schema.pattern}`;
+      typeInfo += `, \`pattern\`: ${schema.pattern}`;
+    }
+    if (isDeprecated(schema)) {
+      typeInfo += " (deprecated)";
     }
 
-    if (schema.description) {
-      message = schema.description;
+    const description = getSchemaDescription(schema);
+    if (description) {
+      message = description;
     }
     return { message, typeInfo };
   }
