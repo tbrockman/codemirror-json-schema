@@ -6,15 +6,17 @@
 
 # Interface: JSONValidationOptions
 
-Defined in: [src/features/validation.ts:45](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/validation.ts#L45)
+Defined in: [src/features/validation.ts:51](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/validation.ts#L51)
 
 ## Properties
 
 ### formatError?
 
-> `optional` **formatError?**: (`error`) => `string`
+> `optional` **formatError?**: (`error`) => `string` \| `undefined`
 
-Defined in: [src/features/validation.ts:47](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/validation.ts#L47)
+Defined in: [src/features/validation.ts:56](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/validation.ts#L56)
+
+Customize the message of a validation error. Return `undefined` to use the default message.
 
 #### Parameters
 
@@ -24,15 +26,15 @@ Defined in: [src/features/validation.ts:47](https://github.com/tbrockman/codemir
 
 #### Returns
 
-`string`
+`string` \| `undefined`
 
 ---
 
 ### jsonParser?
 
-> `optional` **jsonParser?**: `DocumentParser`
+> `optional` **jsonParser?**: [`DocumentParser`](../type-aliases/DocumentParser.md)
 
-Defined in: [src/features/validation.ts:48](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/validation.ts#L48)
+Defined in: [src/features/validation.ts:57](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/validation.ts#L57)
 
 ---
 
@@ -40,4 +42,4 @@ Defined in: [src/features/validation.ts:48](https://github.com/tbrockman/codemir
 
 > `optional` **mode?**: `JSONMode`
 
-Defined in: [src/features/validation.ts:46](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/validation.ts#L46)
+Defined in: [src/features/validation.ts:52](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/validation.ts#L52)

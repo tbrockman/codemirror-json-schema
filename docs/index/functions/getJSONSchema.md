@@ -8,7 +8,7 @@
 
 > **getJSONSchema**(`state`): `void` \| `JSONSchema7`
 
-Defined in: [src/features/state.ts:25](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/state.ts#L25)
+Defined in: [src/features/state.ts:26](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/state.ts#L26)
 
 ## Parameters
 

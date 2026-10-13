@@ -8,7 +8,7 @@
 
 > **preloadMarkdownHighlighter**(): `Promise`\<`void`\>
 
-Defined in: [src/utils/markdown.ts:73](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/utils/markdown.ts#L73)
+Defined in: [src/utils/markdown.ts:72](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/utils/markdown.ts#L72)
 
 Starts loading the syntax highlighter used for fenced code blocks in markdown
 descriptions. Calling this is optional: the highlighter is loaded automatically

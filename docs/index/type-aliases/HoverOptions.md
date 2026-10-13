@@ -8,7 +8,7 @@
 
 > **HoverOptions** = `object`
 
-Defined in: [src/features/hover.ts:25](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/hover.ts#L25)
+Defined in: [src/features/hover.ts:21](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/hover.ts#L21)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [src/features/hover.ts:25](https://github.com/tbrockman/codemirror-j
 
 > `optional` **formatHover?**: (`data`) => `HTMLElement`
 
-Defined in: [src/features/hover.ts:34](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/hover.ts#L34)
+Defined in: [src/features/hover.ts:30](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/hover.ts#L30)
 
 Generate the hover tooltip HTML
 
@@ -36,7 +36,7 @@ Generate the hover tooltip HTML
 
 > `optional` **getHoverTexts?**: (`data`) => `HoverTexts`
 
-Defined in: [src/features/hover.ts:30](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/hover.ts#L30)
+Defined in: [src/features/hover.ts:26](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/hover.ts#L26)
 
 Generate the text to display in the hover tooltip
 
@@ -56,7 +56,7 @@ Generate the text to display in the hover tooltip
 
 > `optional` **mode?**: `JSONMode`
 
-Defined in: [src/features/hover.ts:26](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/hover.ts#L26)
+Defined in: [src/features/hover.ts:22](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/hover.ts#L22)
 
 ---
 
@@ -64,7 +64,7 @@ Defined in: [src/features/hover.ts:26](https://github.com/tbrockman/codemirror-j
 
 > `optional` **parser?**: (`text`) => `any`
 
-Defined in: [src/features/hover.ts:39](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/hover.ts#L39)
+Defined in: [src/features/hover.ts:35](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/hover.ts#L35)
 
 Provide a custom parser for the document
 

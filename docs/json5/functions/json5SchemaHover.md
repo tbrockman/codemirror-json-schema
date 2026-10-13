@@ -8,7 +8,7 @@
 
 > **json5SchemaHover**(`options?`): (`view`, `pos`, `side`) => `Promise`\<`Tooltip` \| `null`\>
 
-Defined in: [src/json5/hover.ts:13](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/json5/hover.ts#L13)
+Defined in: [src/json5/hover.ts:13](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/json5/hover.ts#L13)
 
 Instantiates a JSONHover instance with the JSON5 mode
 

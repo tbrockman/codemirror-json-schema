@@ -1,4 +1,6 @@
-Codemirror 6 extensions that provide full [JSON Schema](https://json-schema.org/) support for `@codemirror/lang-json` & `codemirror-json5` language modes
+Codemirror 6 extensions that provide full [JSON Schema](https://json-schema.org/) support for the `@codemirror/lang-json`, `codemirror-json5` and `@codemirror/lang-yaml` language modes
+
+> This is a fork of [jsonnext/codemirror-json-schema](https://github.com/jsonnext/codemirror-json-schema). It tracks upstream and adds JSON Schema draft 2019-09 / 2020-12 support (via json-schema-library 11), array item and root level error ranges, vscode-style error positions, deprecation warnings, `markdownDescription` / `enumDescriptions`, and a smaller json-only bundle.
 
 <a href="https://npmjs.com/codemirror-json-schema">
 <img alt="npm" src="https://img.shields.io/npm/dm/codemirror-json-schema?label=npm%20downloads">
@@ -10,11 +12,14 @@ Codemirror 6 extensions that provide full [JSON Schema](https://json-schema.org/
 
 This is now a full-featured library for json schema for `json`, `json5` and `yaml` as cm6 extensions!
 
-- ✅ lint validation messages from json schema
+- ✅ lint validation messages from json schema, positioned like vscode (missing required properties and unknown keys highlight the key)
 - ✅ autocompletion with insert text from json schema
 - ✅ hover tooltips
 - ✅ dynamic, per-editor-instance schemas using codemirror `StateField` and linting refresh
-- ✅ markdown rendering for `schema.description` and custom `formatHover` and `formatError` configuration
+- ✅ markdown rendering for `schema.description` (and vscode's `markdownDescription`, `enumDescriptions` / `markdownEnumDescriptions`) and custom `formatHover` and `formatError` configuration
+- ✅ JSON Schema draft-04, draft-06, draft-07, 2019-09 and 2020-12 (`$defs`, `prefixItems`, `dependentRequired`, `unevaluatedProperties`, format validation, ...). The draft is picked from the schema's `$schema`; schemas without one are treated as draft 2020-12
+- ✅ `deprecated: true` properties are reported as warnings (with `deprecationMessage` when present), marked in completions and hovers
+- ✅ syntax highlighting of fenced code blocks in descriptions is loaded lazily (only when a description contains one), so it never ends up in your initial bundle
 
 ## Resources
 
@@ -197,7 +202,7 @@ const json5State = EditorState.create({
     linter(
       json5SchemaLinter({
         needsRefresh: handleRefresh,
-      })
+      }),
     ),
     hoverTooltip(json5SchemaHover()),
     json5Language.data.of({
@@ -272,11 +277,15 @@ const state = EditorState.create({
 }
 ```
 
+### Bundle size
+
+The main entry only contains what the json mode needs. The yaml and json5 parsers (and `yaml`, `json5`, `codemirror-json5`) are only pulled in by the `codemirror-json-schema/yaml` and `codemirror-json-schema/json5` entry points, which register themselves as the default parser for their mode. If you construct `JSONValidation` / `JSONCompletion` directly with `mode: "yaml"` or `mode: "json5"`, import that entry point first (or pass a `jsonParser`), otherwise a descriptive error is thrown.
+
 ## Current Constraints:
 
-- currently only tested with standard schemas using json4 spec. results may vary
 - doesn't place cursor inside known insert text yet
-- currently you can only override the texts and rendering of a hover. we plan to add the same for validation errors and autocomplete
+- currently you can only override the texts and rendering of a hover and the message of a validation error. we plan to add the same for autocomplete
+- `$ref`s to remote schemas are not fetched
 
 ## Inspiration
 

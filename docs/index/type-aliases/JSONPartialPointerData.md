@@ -8,7 +8,7 @@
 
 > **JSONPartialPointerData** = `object`
 
-Defined in: [src/types.ts:6](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/types.ts#L6)
+Defined in: [src/types.ts:6](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/types.ts#L6)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [src/types.ts:6](https://github.com/tbrockman/codemirror-json-schema
 
 > **keyFrom**: `number`
 
-Defined in: [src/types.ts:7](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/types.ts#L7)
+Defined in: [src/types.ts:7](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/types.ts#L7)
 
 ---
 
@@ -24,4 +24,4 @@ Defined in: [src/types.ts:7](https://github.com/tbrockman/codemirror-json-schema
 
 > **keyTo**: `number`
 
-Defined in: [src/types.ts:8](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/types.ts#L8)
+Defined in: [src/types.ts:8](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/types.ts#L8)

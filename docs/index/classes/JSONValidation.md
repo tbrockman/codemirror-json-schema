@@ -6,7 +6,7 @@
 
 # Class: JSONValidation
 
-Defined in: [src/features/validation.ts:80](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/validation.ts#L80)
+Defined in: [src/features/validation.ts:90](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/validation.ts#L90)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/features/validation.ts:80](https://github.com/tbrockman/codemir
 
 > **new JSONValidation**(`options?`): `JSONValidation`
 
-Defined in: [src/features/validation.ts:85](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/validation.ts#L85)
+Defined in: [src/features/validation.ts:95](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/validation.ts#L95)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [src/features/validation.ts:85](https://github.com/tbrockman/codemir
 
 > **doValidation**(`view`): `Diagnostic`[]
 
-Defined in: [src/features/validation.ts:126](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/validation.ts#L126)
+Defined in: [src/features/validation.ts:151](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/validation.ts#L151)
 
 #### Parameters
 

@@ -18,11 +18,14 @@
 
 ## Utilities
 
+- [compileSchemaCached](functions/compileSchemaCached.md)
+- [getCompiledSchema](functions/getCompiledSchema.md)
 - [getJsonPointers](functions/getJsonPointers.md)
 - [jsonPointerForPosition](functions/jsonPointerForPosition.md)
 - [parseJSONDocument](functions/parseJSONDocument.md)
 - [parseJSONDocumentState](functions/parseJSONDocumentState.md)
 - [preloadMarkdownHighlighter](functions/preloadMarkdownHighlighter.md)
+- [registerParser](functions/registerParser.md)
 
 ## Classes
 
@@ -47,6 +50,7 @@
 ## Type Aliases
 
 - [CursorData](type-aliases/CursorData.md)
+- [DocumentParser](type-aliases/DocumentParser.md)
 - [FoundCursorData](type-aliases/FoundCursorData.md)
 - [HoverOptions](type-aliases/HoverOptions.md)
 - [JSONPartialPointerData](type-aliases/JSONPartialPointerData.md)

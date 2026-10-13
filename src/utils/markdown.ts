@@ -40,7 +40,6 @@ function setupHighlighter() {
             import("shiki/langs/json.mjs"),
             import("shiki/langs/yaml.mjs"),
             import("shiki/langs/javascript.mjs"),
-            import("shiki/langs/typescript.mjs"),
             import("shiki/langs/shellscript.mjs"),
           ],
           engine: createJavaScriptRegexEngine({ forgiving: true }),

@@ -8,7 +8,7 @@
 
 > **JSONPointerData** = `object`
 
-Defined in: [src/types.ts:11](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/types.ts#L11)
+Defined in: [src/types.ts:11](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/types.ts#L11)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [src/types.ts:11](https://github.com/tbrockman/codemirror-json-schem
 
 > `optional` **keyFrom?**: `number`
 
-Defined in: [src/types.ts:12](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/types.ts#L12)
+Defined in: [src/types.ts:12](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/types.ts#L12)
 
 ---
 
@@ -24,7 +24,7 @@ Defined in: [src/types.ts:12](https://github.com/tbrockman/codemirror-json-schem
 
 > `optional` **keyTo?**: `number`
 
-Defined in: [src/types.ts:13](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/types.ts#L13)
+Defined in: [src/types.ts:13](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/types.ts#L13)
 
 ---
 
@@ -32,7 +32,7 @@ Defined in: [src/types.ts:13](https://github.com/tbrockman/codemirror-json-schem
 
 > **valueFrom**: `number`
 
-Defined in: [src/types.ts:14](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/types.ts#L14)
+Defined in: [src/types.ts:14](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/types.ts#L14)
 
 ---
 
@@ -40,4 +40,4 @@ Defined in: [src/types.ts:14](https://github.com/tbrockman/codemirror-json-schem
 
 > **valueTo**: `number`
 
-Defined in: [src/types.ts:15](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/types.ts#L15)
+Defined in: [src/types.ts:15](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/types.ts#L15)

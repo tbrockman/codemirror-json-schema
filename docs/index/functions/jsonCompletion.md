@@ -8,7 +8,7 @@
 
 > **jsonCompletion**(`opts?`): (`ctx`) => `never`[] \| `CompletionResult`
 
-Defined in: [src/features/completion.ts:1062](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/completion.ts#L1062)
+Defined in: [src/features/completion.ts:1090](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/completion.ts#L1090)
 
 provides a JSON schema enabled autocomplete extension for codemirror
 

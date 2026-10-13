@@ -6,7 +6,7 @@
 
 # Class: JSONHover
 
-Defined in: [src/features/hover.ts:85](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/hover.ts#L85)
+Defined in: [src/features/hover.ts:81](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/hover.ts#L81)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/features/hover.ts:85](https://github.com/tbrockman/codemirror-j
 
 > **new JSONHover**(`opts?`): `JSONHover`
 
-Defined in: [src/features/hover.ts:88](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/hover.ts#L88)
+Defined in: [src/features/hover.ts:84](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/hover.ts#L84)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [src/features/hover.ts:88](https://github.com/tbrockman/codemirror-j
 
 > **doHover**(`view`, `pos`, `side`): `Promise`\<`Tooltip` \| `null`\>
 
-Defined in: [src/features/hover.ts:203](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/hover.ts#L203)
+Defined in: [src/features/hover.ts:203](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/hover.ts#L203)
 
 #### Parameters
 
@@ -58,7 +58,7 @@ Defined in: [src/features/hover.ts:203](https://github.com/tbrockman/codemirror-
 
 > **getDataForCursor**(`view`, `pos`, `side`): [`CursorData`](../type-aliases/CursorData.md) \| `null`
 
-Defined in: [src/features/hover.ts:95](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/hover.ts#L95)
+Defined in: [src/features/hover.ts:91](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/hover.ts#L91)
 
 #### Parameters
 
@@ -82,9 +82,9 @@ Defined in: [src/features/hover.ts:95](https://github.com/tbrockman/codemirror-j
 
 ### getHoverTexts()
 
-> **getHoverTexts**(`data`, `draft`): `HoverTexts`
+> **getHoverTexts**(`data`, `root`): `HoverTexts`
 
-Defined in: [src/features/hover.ts:162](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/features/hover.ts#L162)
+Defined in: [src/features/hover.ts:158](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/features/hover.ts#L158)
 
 #### Parameters
 
@@ -92,9 +92,9 @@ Defined in: [src/features/hover.ts:162](https://github.com/tbrockman/codemirror-
 
 [`FoundCursorData`](../type-aliases/FoundCursorData.md)
 
-##### draft
+##### root
 
-`Draft`
+`SchemaNode`
 
 #### Returns
 

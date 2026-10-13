@@ -8,7 +8,7 @@
 
 > **parseJSON5Document**(`jsonString`): `object`
 
-Defined in: [src/parsers/json5-parser.ts:38](https://github.com/tbrockman/codemirror-json-schema/blob/64d4e382f9142306cacceb1459bc9b63a127521b/src/parsers/json5-parser.ts#L38)
+Defined in: [src/parsers/json5-parser.ts:38](https://github.com/tbrockman/codemirror-json-schema/blob/d3bb5a447f92c7283d8fc3935c4a356fe7033547/src/parsers/json5-parser.ts#L38)
 
 Mimics the behavior of `json-source-map`'s `parseJSONDocument` function, for json5!
 
