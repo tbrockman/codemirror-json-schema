@@ -1,5 +1,31 @@
 # codemirror-json-schema
 
+## 0.8.1
+
+### Patch Changes
+
+- [#151](https://github.com/jsonnext/codemirror-json-schema/pull/151) [`d360a86`](https://github.com/jsonnext/codemirror-json-schema/commit/d360a86b90aef61fb1a112ea3298a9ebed1c9012) Thanks [@skrabe](https://github.com/skrabe)! - Fixed validation bugs: single objects incorrectly passed array schemas, invalid YAML caused errors after root-level change(now skipped if unparseable), and added tests ensuring non-array values(object, boolean, string, number) are correctly rejected.
+
+## 0.8.0
+
+### Minor Changes
+
+- [#138](https://github.com/jsonnext/codemirror-json-schema/pull/138) [`aa27ad7`](https://github.com/jsonnext/codemirror-json-schema/commit/aa27ad740fec447069bacd1d817e1d32fbbf8d90) Thanks [@thomasjahoda](https://github.com/thomasjahoda)! - More robust conditional types support (thanks @thomasjahoda!)
+
+## 0.7.9
+
+### Patch Changes
+
+- [#133](https://github.com/jsonnext/codemirror-json-schema/pull/133) [`4fd7cc6`](https://github.com/jsonnext/codemirror-json-schema/commit/4fd7cc69084bdad3c8c93d9d0f0a936fa120cbae) Thanks [@imolorhe](https://github.com/imolorhe)! - Get sub schema using parsed data for additional context
+
+- [#137](https://github.com/jsonnext/codemirror-json-schema/pull/137) [`29e2da5`](https://github.com/jsonnext/codemirror-json-schema/commit/29e2da5b5a16f8b076186e9623fe93ce6d086c30) Thanks [@xdavidwu](https://github.com/xdavidwu)! - Fix description markdown rendering in completion
+
+- [#144](https://github.com/jsonnext/codemirror-json-schema/pull/144) [`ef7f336`](https://github.com/jsonnext/codemirror-json-schema/commit/ef7f336f0d79397b19a37e76228f8a9b25070c89) Thanks [@imolorhe](https://github.com/imolorhe)! - updated to use fine grained shiki bundle
+
+- [#139](https://github.com/jsonnext/codemirror-json-schema/pull/139) [`bfbe613`](https://github.com/jsonnext/codemirror-json-schema/commit/bfbe613c81ba43e079e454b9c59a48a2f3887810) Thanks [@NickTomlin](https://github.com/NickTomlin)! - Move non essential packages to devDependencies
+
+- [#140](https://github.com/jsonnext/codemirror-json-schema/pull/140) [`bceace2`](https://github.com/jsonnext/codemirror-json-schema/commit/bceace285c137a53f3773219ee008ad1d856c770) Thanks [@NickTomlin](https://github.com/NickTomlin)! - Add CONTRIBUTING.md file
+
 ## 0.7.8
 
 ### Patch Changes

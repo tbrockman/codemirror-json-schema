@@ -103,7 +103,7 @@ export class JSONValidation {
     if (error.code === "one-of-error" && errors?.length) {
       return `Expected one of ${joinWithOr(
         errors,
-        (data) => data.data.expected
+        (data) => data.data.expected,
       )}`;
     }
     if (error.code === "type-error") {
@@ -137,6 +137,8 @@ export class JSONValidation {
     if (!text?.length) return [];
 
     const json = this.parser(view.state);
+    // skip validation if parsing fails
+    if (json.data == null) return [];
 
     let errors: JsonError[] = [];
     try {
@@ -166,7 +168,8 @@ export class JSONValidation {
 
       if (
         error.name === "MaxPropertiesError" ||
-        error.name === "MinPropertiesError"
+        error.name === "MinPropertiesError" ||
+        errorPath === "" // root level type errors
       ) {
         pushRoot();
       } else if (pointer) {

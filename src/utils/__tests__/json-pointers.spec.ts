@@ -93,7 +93,7 @@ bar: 123
       });
       const pointer = jsonPointerForPosition(state, pos, 1, mode);
       expect(pointer).toEqual(expected);
-    }
+    },
   );
 });
 
@@ -335,6 +335,6 @@ boop:
       });
       const pointers = getJsonPointers(state, mode);
       expect(Object.fromEntries(pointers.entries())).toEqual(expected);
-    }
+    },
   );
 });

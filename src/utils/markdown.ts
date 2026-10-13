@@ -1,5 +1,6 @@
 import md from "markdown-it";
-// import shiki from "@shikijs/markdown-it";
+import { fromHighlighter } from "@shikijs/markdown-it/core";
+import { createHighlighterCore, HighlighterGeneric } from "shiki/core";
 
 // const defaultPlugins = [
 //   "markdown-it-abbr",
@@ -27,15 +28,23 @@ const renderer = md({
   typographer: true,
 });
 
-// (async () => {
-//   const shikiRenderer = await shiki({
-//     themes: {
-//       light: "vitesse-light",
-//       dark: "vitesse-dark",
-//     },
-//   });
-//   renderer.use(shikiRenderer);
-// })();
+(async () => {
+  const highlighter = (await createHighlighterCore({
+    themes: [
+      import("shiki/themes/vitesse-light.mjs"),
+      import("shiki/themes/vitesse-dark.mjs"),
+    ],
+    langs: [import("shiki/langs/javascript.mjs")],
+  })) as HighlighterGeneric<any, any>;
+  renderer.use(
+    fromHighlighter(highlighter, {
+      themes: {
+        light: "vitesse-light",
+        dark: "vitesse-dark",
+      },
+    })
+  );
+})();
 
 export function renderMarkdown(markdown: string, inline: boolean = true) {
   if (!inline) return renderer.render(markdown);
