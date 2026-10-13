@@ -413,6 +413,131 @@ describe.each([
     schema: testSchemaDraft2020,
   },
   {
+    name: "not add a value when the property already has one",
+    mode: MODES.JSON,
+    docs: ['{ "fo|": "bar" }', '{ "fo|": { "x": 1 } }', '{ "fo|": [] }'],
+    expectedResults: [
+      {
+        type: "property",
+        detail: "string",
+        info: "",
+        label: "foo",
+        template: '"foo"',
+      },
+    ],
+  },
+  {
+    name: "add a separator when another property follows",
+    mode: MODES.JSON,
+    docs: ['{ "fo|\n "x": 1 }'],
+    expectedResults: [
+      {
+        type: "property",
+        detail: "string",
+        info: "",
+        label: "foo",
+        template: '"foo": "#{}",',
+      },
+    ],
+  },
+  {
+    name: "not add a separator at the end of an object or before an existing one",
+    mode: MODES.JSON,
+    docs: ['{ "x": 1, "fo| }', '{ "fo|",\n "x": 1 }', '{ "fo|'],
+    expectedResults: [
+      {
+        type: "property",
+        detail: "string",
+        info: "",
+        label: "foo",
+        template: '"foo": "#{}"',
+      },
+    ],
+  },
+  {
+    name: "insert a true placeholder for booleans without a default",
+    mode: MODES.JSON,
+    docs: ['{ "fl| }'],
+    expectedResults: [
+      {
+        type: "property",
+        detail: "boolean",
+        info: "a boolean without a default",
+        label: "flag",
+        template: '"flag": #{true}',
+      },
+    ],
+    schema: {
+      type: "object",
+      properties: {
+        flag: { type: "boolean", description: "a boolean without a default" },
+      },
+    },
+  },
+  {
+    name: "not add a value when the property already has one",
+    mode: MODES.JSON5,
+    docs: ["{ fo|: 'bar' }", "{ fo|: { x: 1 } }"],
+    expectedResults: [
+      {
+        type: "property",
+        detail: "string",
+        info: "",
+        label: "foo",
+        template: "foo",
+      },
+    ],
+  },
+  {
+    name: "add a separator when another property follows",
+    mode: MODES.JSON5,
+    docs: ["{ fo|\n x: 1 }"],
+    expectedResults: [
+      {
+        type: "property",
+        detail: "string",
+        info: "",
+        label: "foo",
+        template: "foo: '#{}',",
+      },
+    ],
+  },
+  {
+    name: "not add a value when the property already has one",
+    mode: MODES.YAML,
+    docs: ["fo|: bar", "fo|:\n  x: 1"],
+    expectedResults: [
+      {
+        type: "property",
+        detail: "string",
+        info: "",
+        label: "foo",
+        template: "foo",
+      },
+    ],
+  },
+  {
+    name: "add a value for a new key in a mapping",
+    mode: MODES.YAML,
+    docs: ["foo: x\nob|", "ob|\nfoo: x"],
+    expectedResults: [
+      {
+        type: "property",
+        detail: "object",
+        info: "",
+        label: "object",
+        template: "object: #{}",
+      },
+      {
+        type: "property",
+        detail: "",
+        info: "",
+        label: "objectWithRef",
+        template: "objectWithRef: #{}",
+      },
+    ],
+  },
+  {
     name: "autocomplete for a schema with conditional properties",
     mode: MODES.JSON,
     docs: ['{ "type": "Test_1", "props": { t| }}'],

@@ -8,7 +8,7 @@ import { resolveTokenName } from "./json-pointers";
 export const getNodeAtPosition = (
   state: EditorState,
   pos: number,
-  side: Side = -1
+  side: Side = -1,
 ) => {
   return syntaxTree(state).resolveInner(pos, side);
 };
@@ -24,7 +24,7 @@ export const getWord = (
   doc: Text,
   node: SyntaxNode | null,
   stripQuotes = true,
-  onlyEvenQuotes = true
+  onlyEvenQuotes = true,
 ) => {
   const word = node ? doc.sliceString(node.from, node.to) : "";
   if (!stripQuotes) {
@@ -56,7 +56,7 @@ export const isPrimitiveValueNode = (node: SyntaxNode, mode: JSONMode) => {
 export const isValueNode = (node: SyntaxNode, mode: JSONMode) => {
   return (
     [...PRIMITIVE_TYPES, ...COMPLEX_TYPES].includes(
-      resolveTokenName(node.name, mode) as any
+      resolveTokenName(node.name, mode) as any,
     ) || isInvalidValueNode(node, mode)
   );
 };
@@ -90,21 +90,21 @@ export const getChildrenNodes = (node: SyntaxNode) => {
 export const getMatchingChildrenNodes = (
   node: SyntaxNode,
   nodeName: string,
-  mode: JSONMode
+  mode: JSONMode,
 ) => {
   return getChildrenNodes(node).filter(
-    (n) => resolveTokenName(n.name, mode) === nodeName
+    (n) => resolveTokenName(n.name, mode) === nodeName,
   );
 };
 
 export const getMatchingChildNode = (
   node: SyntaxNode,
   nodeName: string,
-  mode: JSONMode
+  mode: JSONMode,
 ) => {
   return (
     getChildrenNodes(node).find(
-      (n) => resolveTokenName(n.name, mode) === nodeName
+      (n) => resolveTokenName(n.name, mode) === nodeName,
     ) ?? null
   );
 };
@@ -113,20 +113,39 @@ export const getChildValueNode = (node: SyntaxNode, mode: JSONMode) => {
   return getChildrenNodes(node).find((n) => isPrimitiveValueNode(n, mode));
 };
 
+/**
+ * whether a property node already has a (primitive or complex) value.
+ * An error node between the property name and the value means the parser recovered
+ * from an incomplete property by swallowing whatever follows it (e.g. the next property
+ * in json5), so that is not treated as a value of this property.
+ */
+export const hasValueNode = (propertyNode: SyntaxNode, mode: JSONMode) => {
+  for (const child of getChildrenNodes(propertyNode)) {
+    const name = resolveTokenName(child.name, mode);
+    if (name === TOKENS.INVALID) {
+      return false;
+    }
+    if ([...PRIMITIVE_TYPES, ...COMPLEX_TYPES].includes(name as any)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const getArrayNodeChildren = (node: SyntaxNode, mode: JSONMode) => {
   return getChildrenNodes(node).filter(
     (n) =>
       PRIMITIVE_TYPES.includes(resolveTokenName(n.name, mode) as any) ||
-      COMPLEX_TYPES.includes(resolveTokenName(n.name, mode) as any)
+      COMPLEX_TYPES.includes(resolveTokenName(n.name, mode) as any),
   );
 };
 export const findNodeIndexInArrayNode = (
   arrayNode: SyntaxNode,
   valueNode: SyntaxNode,
-  mode: JSONMode
+  mode: JSONMode,
 ) => {
   return getArrayNodeChildren(arrayNode, mode).findIndex(
-    (nd) => nd.from === valueNode.from && nd.to === valueNode.to
+    (nd) => nd.from === valueNode.from && nd.to === valueNode.to,
   );
 };
 
@@ -134,7 +153,7 @@ export const getClosestNode = (
   node: SyntaxNode,
   nodeName: string,
   mode: JSONMode,
-  depth = Infinity
+  depth = Infinity,
 ) => {
   let n: SyntaxNode | null = node;
   while (n && depth > 0) {

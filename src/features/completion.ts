@@ -5,14 +5,14 @@ import {
   snippetCompletion,
 } from "@codemirror/autocomplete";
 import { syntaxTree } from "@codemirror/language";
+import type { EditorState } from "@codemirror/state";
 import { SyntaxNode } from "@lezer/common";
 import { JSONSchema7, JSONSchema7Definition } from "json-schema";
 import { debug } from "../utils/debug";
 import {
   findNodeIndexInArrayNode,
-  getChildrenNodes,
-  getChildValueNode,
   getClosestNode,
+  hasValueNode,
   getMatchingChildNode,
   getMatchingChildrenNodes,
   getNodeAtPosition,
@@ -190,6 +190,7 @@ export class JSONCompletion {
     const collector = new CompletionCollector();
 
     let addValue = true;
+    const separatorAfter = this.getSeparatorAfter(ctx.state, result.to);
 
     const closestPropertyNameNode = getClosestNode(
       node,
@@ -212,23 +213,15 @@ export class JSONCompletion {
       debug.log("xxx", "isPropertyNameNode", node);
       const parent = node.parent;
       if (parent) {
-        // get value node from parent
-        const valueNode = getChildValueNode(parent, this.mode);
-        addValue =
-          !valueNode ||
-          (valueNode.name === TOKENS.INVALID &&
-            valueNode.from - valueNode.to === 0) ||
-          // TODO: Verify this doesn't break anything else
-          (valueNode.parent
-            ? getChildrenNodes(valueNode.parent).length <= 1
-            : false);
-        debug.log(
-          "xxx",
-          "addValue",
-          addValue,
-          getChildValueNode(parent, this.mode),
-          node,
+        // only add a value if the property doesn't have one already.
+        // when there is no property node yet (e.g. an unterminated key in json,
+        // or a bare word in a yaml mapping), the parent is the object itself and
+        // there can't be an existing value.
+        addValue = !(
+          resolveTokenName(parent.name, this.mode) === TOKENS.PROPERTY &&
+          hasValueNode(parent, this.mode)
         );
+        debug.log("xxx", "addValue", addValue, node);
         // find object node
         node = getClosestNode(parent, TOKENS.OBJECT, this.mode) ?? null;
       }
@@ -266,6 +259,7 @@ export class JSONCompletion {
         collector,
         addValue,
         rawWord,
+        separatorAfter,
       );
     } else {
       // proposals for values
@@ -317,6 +311,7 @@ export class JSONCompletion {
     collector: CompletionCollector,
     addValue: boolean,
     rawWord: string,
+    separatorAfter: string,
   ) {
     // don't suggest properties that are already present
     const properties = getMatchingChildrenNodes(
@@ -332,8 +327,6 @@ export class JSONCompletion {
       );
       collector.reserve(stripSurroundingQuotes(key));
     });
-
-    // TODO: Handle separatorAfter
 
     // Get matching schemas
     const schemas = this.getSchemas(rootSchema, ctx);
@@ -359,6 +352,7 @@ export class JSONCompletion {
                 addValue,
                 rawWord,
                 rootSchema,
+                separatorAfter,
                 value,
               ),
               type: "property",
@@ -385,6 +379,7 @@ export class JSONCompletion {
                   addValue,
                   rawWord,
                   rootSchema,
+                  separatorAfter,
                 ),
                 type: "property",
               };
@@ -402,6 +397,7 @@ export class JSONCompletion {
               addValue,
               rawWord,
               rootSchema,
+              separatorAfter,
             ),
             type: "property",
           };
@@ -427,6 +423,7 @@ export class JSONCompletion {
     addValue: boolean,
     rawWord: string,
     rootSchema: JSONSchema7,
+    separatorAfter: string,
     propertySchema?: JSONSchema7Definition,
   ) {
     // expand schema property if it is a reference
@@ -490,7 +487,7 @@ export class JSONCompletion {
           }
           switch (type) {
             case "boolean":
-              value = "#{}";
+              value = "#{true}";
               break;
             case "string":
               value = this.getInsertTextForString("");
@@ -538,7 +535,25 @@ export class JSONCompletion {
       value = "#{}";
     }
 
-    return resultText + value;
+    return resultText + value + separatorAfter;
+  }
+
+  /**
+   * Mirrors vscode's evaluateSeparatorAfter: when the completed property is followed by
+   * another property, a separator (`,`) is appended, otherwise (end of object, end of
+   * document or an existing separator) nothing is added. YAML never needs one.
+   */
+  private getSeparatorAfter(state: EditorState, pos: number): string {
+    if (this.mode === MODES.YAML) {
+      return "";
+    }
+    const next = state.doc
+      .sliceString(pos, state.doc.length)
+      .match(/^\s*(\S)/)?.[1];
+    if (next === undefined || [",", "}", "]"].includes(next)) {
+      return "";
+    }
+    return ",";
   }
 
   private getInsertTextForPropertyName(key: string, rawWord: string) {
