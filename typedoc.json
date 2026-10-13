@@ -1,5 +1,7 @@
 {
   "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/index.ts", "src/json5/index.ts", "src/yaml/index.ts"],
+  "out": "docs",
   "groupOrder": [
     "Bundled Codemirror Extensions",
     "Codemirror Extensions",

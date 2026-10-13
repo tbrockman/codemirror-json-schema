@@ -8,9 +8,10 @@ export default defineConfig({
     }),
   ],
   test: {
+    environment: "happy-dom",
     maxConcurrency: 10,
     // configuration to be able to view console.log messages while debugging
     pool: "forks",
-    disableConsoleIntercept: Boolean(process.env.CI)
+    disableConsoleIntercept: Boolean(process.env.CI),
   },
 });

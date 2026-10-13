@@ -29,5 +29,6 @@ export type {
 
 export * from "./parsers/json-parser";
 export * from "./utils/json-pointers";
+export { preloadMarkdownHighlighter } from "./utils/markdown";
 
 export * from "./features/state";
