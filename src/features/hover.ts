@@ -1,17 +1,12 @@
 import { type EditorView, Tooltip } from "@codemirror/view";
-import {
-  type Draft,
-  Draft04,
-  JsonSchema,
-  isJsonError,
-} from "json-schema-library";
+import { type JsonSchema, type SchemaNode } from "json-schema-library";
 
 import { jsonPointerForPosition } from "../utils/json-pointers";
 import { joinWithOr } from "../utils/formatting";
 import { debug } from "../utils/debug";
 import { JSONMode, Side } from "../types";
 import { el } from "../utils/dom";
-import { getJSONSchema } from "./state";
+import { getCompiledSchema } from "./state";
 import { MODES } from "../constants";
 import { renderMarkdown } from "../utils/markdown";
 import { JSONSchema7Type } from "json-schema";
@@ -65,25 +60,25 @@ function formatType(data: { type?: JSONSchema7Type; $ref?: string }) {
 function formatComplexType(
   schema: JsonSchema,
   complexType: "oneOf" | "anyOf" | "allOf",
-  draft: Draft
+  root: SchemaNode,
 ) {
   return `${complexType}: ${joinWithOr(
     schema[complexType].map((s: JsonSchema) => {
       try {
-        const { data } = draft.resolveRef({ data: s, pointer: s.$ref });
-        if (data) {
-          return formatType(data);
+        if (s.$ref) {
+          const resolved = root.getNodeRef(s.$ref)?.schema;
+          return formatType({ $ref: s.$ref, type: resolved?.type });
         }
         return formatType(s);
       } catch (err) {
         return s.type;
       }
-    })
+    }),
   )}`;
 }
 
 export class JSONHover {
-  private schema: Draft | null = null;
+  private schema: SchemaNode | null = null;
   private mode: JSONMode = MODES.JSON;
   public constructor(private opts?: HoverOptions) {
     this.opts = {
@@ -95,15 +90,15 @@ export class JSONHover {
   public getDataForCursor(
     view: EditorView,
     pos: number,
-    side: Side
+    side: Side,
   ): CursorData | null {
-    const schema = getJSONSchema(view.state)!;
+    const schema = getCompiledSchema(view.state);
     if (!schema) {
       // todo: should we even do anything without schema
       // without taking over the existing mode responsibilties?
       return null;
     }
-    this.schema = new Draft04(schema);
+    this.schema = schema;
 
     const pointer = jsonPointerForPosition(view.state, pos, side, this.mode);
 
@@ -117,17 +112,17 @@ export class JSONHover {
       return null;
     }
     // if the data is valid, we can infer a type for complex types
-    let subSchema = this.schema.getSchema({
-      pointer,
-      data,
+    const { node, error } = this.schema.getNode(pointer, data, {
       withSchemaWarning: true,
     });
-    if (isJsonError(subSchema)) {
-      if (subSchema?.data.schema["$ref"]) {
-        subSchema = this.schema.resolveRef(subSchema);
-      } else {
-        subSchema = subSchema?.data.schema;
-      }
+    let subSchema: JsonSchema | undefined = node?.schema;
+    if (!subSchema && error) {
+      // use the last schema that could be resolved, e.g. the oneOf schema for a value
+      // that matches none of its alternatives
+      const errorSchema = error.data?.schema as JsonSchema | undefined;
+      subSchema = errorSchema?.$ref
+        ? (this.schema.getNodeRef(errorSchema.$ref)?.schema ?? errorSchema)
+        : errorSchema;
     }
 
     return { schema: subSchema, pointer };
@@ -159,20 +154,20 @@ export class JSONHover {
     ]);
   }
 
-  public getHoverTexts(data: FoundCursorData, draft: Draft): HoverTexts {
+  public getHoverTexts(data: FoundCursorData, root: SchemaNode): HoverTexts {
     let typeInfo = "";
     let message = null;
 
     const { schema } = data;
 
     if (schema.oneOf) {
-      typeInfo = formatComplexType(schema, "oneOf", draft);
+      typeInfo = formatComplexType(schema, "oneOf", root);
     }
     if (schema.anyOf) {
-      typeInfo = formatComplexType(schema, "anyOf", draft);
+      typeInfo = formatComplexType(schema, "anyOf", root);
     }
     if (schema.allOf) {
-      typeInfo = formatComplexType(schema, "allOf", draft);
+      typeInfo = formatComplexType(schema, "allOf", root);
     }
 
     if (schema.type) {
@@ -203,7 +198,7 @@ export class JSONHover {
   public async doHover(
     view: EditorView,
     pos: number,
-    side: Side
+    side: Side,
   ): Promise<Tooltip | null> {
     const start = pos,
       end = pos;
@@ -216,7 +211,7 @@ export class JSONHover {
       const getHoverTexts = this.opts?.getHoverTexts ?? this.getHoverTexts;
       const hoverTexts = getHoverTexts(
         cursorData as FoundCursorData,
-        this.schema!
+        this.schema!,
       );
       // allow users to override the hover
       const formatter = this.opts?.formatHover ?? this.formatMessage;

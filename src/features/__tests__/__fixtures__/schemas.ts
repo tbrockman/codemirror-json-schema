@@ -252,3 +252,29 @@ export const testSchemaArrayOfObjects = {
     type: "object",
   },
 } as JSONSchema7;
+
+export const testSchemaDraft2020 = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  type: "object",
+  properties: {
+    tuple: {
+      type: "array",
+      prefixItems: [{ type: "string" }, { type: "number" }],
+    },
+    item: { $ref: "#/$defs/item" },
+    email: { type: "string", format: "email" },
+    credit: { type: "string" },
+    old: { type: "string", deprecated: true },
+  },
+  dependentRequired: { credit: ["email"] },
+  unevaluatedProperties: false,
+  $defs: {
+    item: {
+      type: "object",
+      properties: {
+        name: { type: "string", description: "the name of the item" },
+      },
+      required: ["name"],
+    },
+  },
+} as unknown as JSONSchema7;

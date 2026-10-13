@@ -1,8 +1,8 @@
 import type { EditorView, ViewUpdate } from "@codemirror/view";
 import { type Diagnostic } from "@codemirror/lint";
-import { Draft04, type Draft, type JsonError } from "json-schema-library";
+import { type JsonError, type SchemaNode } from "json-schema-library";
 
-import { getJSONSchema, schemaStateField } from "./state";
+import { getCompiledSchema, schemaStateField } from "./state";
 import { joinWithOr } from "../utils/formatting";
 import { JSONMode, JSONPointerData, RequiredPick } from "../types";
 import { el } from "../utils/dom";
@@ -13,25 +13,27 @@ import { DocumentParser, getDefaultParser } from "../parsers";
 
 // return an object path that matches with the json-source-map pointer
 const getErrorPath = (error: JsonError): string => {
-  // if a pointer is present, return without #
-  if (error?.data?.pointer) {
-    const pointer =
-      error?.data?.pointer !== "#" ? error?.data?.pointer.slice(1) : "";
+  const rawPointer = error?.data?.pointer;
+  // strip the leading # from the json-schema-library pointer
+  const pointer =
+    typeof rawPointer === "string" && rawPointer !== "#"
+      ? rawPointer.replace(/^#/, "")
+      : "";
 
-    // the following checks allow for highlighting the key of the errors
-    if (["PatternPropertiesError"].includes(error?.name) && error?.data?.key) {
-      return `${pointer}/${error.data.key}`;
-    }
-    if (
-      [
-        "NoAdditionalPropertiesError",
-        "InvalidPropertyNameError",
-        "ForbiddenPropertyError",
-      ].includes(error?.name) &&
-      error?.data?.property
-    ) {
-      return `${pointer}/${error.data.property}`;
-    }
+  // these errors are reported at the parent object, with the offending key in the error data,
+  // so extend the pointer to be able to highlight the key itself
+  if (
+    ["invalid-property-name-error", "forbidden-property-error"].includes(
+      error.code as string,
+    ) &&
+    error?.data?.property
+  ) {
+    return `${pointer}/${error.data.property}`;
+  }
+  if (error.code === "pattern-properties-error" && error?.data?.key) {
+    return `${pointer}/${error.data.key}`;
+  }
+  if (pointer) {
     return pointer;
   }
   // return plain data.property if present
@@ -67,44 +69,60 @@ export function jsonSchemaLinter(options?: JSONValidationOptions) {
   };
 }
 
-// all the error types that apply to a specific key or value
+// all the error types that apply to a specific key rather than its value
 const positionalErrors = [
-  "NoAdditionalPropertiesError",
-  "RequiredPropertyError",
-  "InvalidPropertyNameError",
-  "ForbiddenPropertyError",
-  "UndefinedValueError",
-  "PatternPropertiesError",
+  "no-additional-properties-error",
+  "unevaluated-property-error",
+  "required-property-error",
+  "invalid-property-name-error",
+  "forbidden-property-error",
+  "undefined-value-error",
+  "pattern-properties-error",
 ];
 
 export class JSONValidation {
-  private schema: Draft | null = null;
+  private schema: SchemaNode | null = null;
 
   private mode: JSONMode = MODES.JSON;
   private parser: DocumentParser;
   public constructor(private options?: JSONValidationOptions) {
     this.mode = this.options?.mode ?? MODES.JSON;
     this.parser = this.options?.jsonParser ?? getDefaultParser(this.mode);
-
-    // TODO: support other versions of json schema.
-    // most standard schemas are draft 4 for some reason, probably
-    // backwards compatibility
-    //
-    // ajv did not support draft 4, so I used json-schema-library
   }
   private get schemaTitle() {
-    return this.schema?.getSchema()?.title ?? "json-schema";
+    return this.schema?.schema?.title ?? "json-schema";
   }
 
   // rewrite the error message to be more human readable
   private rewriteError = (error: JsonError): string => {
     const errorData = error?.data;
-    const errors = errorData?.errors as string[];
+    const errors = errorData?.errors as JsonError[];
     if (error.code === "one-of-error" && errors?.length) {
       return `Expected one of ${joinWithOr(
         errors,
         (data) => data.data.expected,
       )}`;
+    }
+    if (
+      error.code === "no-additional-properties-error" ||
+      error.code === "unevaluated-property-error"
+    ) {
+      // these errors point at the offending property itself, so name its parent instead
+      const pointer: string =
+        typeof errorData?.pointer === "string" ? errorData.pointer : "";
+      const segments = pointer.replace(/^#\/?/, "").split("/").filter(Boolean);
+      const last = segments.pop();
+      const property = errorData?.property ?? errorData?.key ?? last;
+      const parent = segments.join(".");
+      return parent
+        ? `Additional property \`${property}\` in \`${parent}\` is not allowed`
+        : `Additional property \`${property}\` is not allowed`;
+    }
+    if (
+      error.code === "missing-dependency-error" &&
+      errorData?.missingProperty
+    ) {
+      return `The required property \`${errorData.missingProperty}\` is missing`;
     }
     if (error.code === "type-error") {
       return `Expected \`${
@@ -124,13 +142,12 @@ export class JSONValidation {
 
   // validate using view as the linter extension signature requires
   public doValidation(view: EditorView) {
-    const schema = getJSONSchema(view.state);
+    const schema = getCompiledSchema(view.state);
     if (!schema) {
       return [];
     }
-    this.schema = new Draft04(schema);
+    this.schema = schema;
 
-    if (!this.schema) return [];
     const text = view.state.doc.toString();
 
     // ignore blank json strings
@@ -142,8 +159,10 @@ export class JSONValidation {
 
     let errors: JsonError[] = [];
     try {
-      errors = this.schema.validate(json.data);
-    } catch {}
+      errors = this.schema.validate(json.data).errors;
+    } catch (err) {
+      debug.log("xxx", "validation threw", err);
+    }
     debug.log("xxx", "validation errors", errors, json.data);
     if (!errors.length) return [];
     // reduce() because we want to filter out errors that don't have a pointer
@@ -167,14 +186,14 @@ export class JSONValidation {
       const pointer = json.pointers.get(errorPath) as JSONPointerData;
 
       if (
-        error.name === "MaxPropertiesError" ||
-        error.name === "MinPropertiesError" ||
+        error.code === "max-properties-error" ||
+        error.code === "min-properties-error" ||
         errorPath === "" // root level type errors
       ) {
         pushRoot();
       } else if (pointer) {
         // if the error is a property error, use the key position
-        const isKeyError = positionalErrors.includes(error.name);
+        const isKeyError = positionalErrors.includes(error.code as string);
         const errorString = this.rewriteError(error);
         const from =
           isKeyError && pointer.keyFrom ? pointer.keyFrom : pointer.valueFrom;

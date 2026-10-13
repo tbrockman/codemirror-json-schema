@@ -8,6 +8,7 @@ import {
   testSchema,
   testSchema2,
   testSchemaArrayOfObjects,
+  testSchemaDraft2020,
 } from "./__fixtures__/schemas";
 import { JSONMode } from "../../types";
 import { getExtensions } from "./__helpers__/index";
@@ -207,6 +208,72 @@ describe("json-validation", () => {
       doc: '[{"name": "John"}, {"name": "Jane"}]',
       errors: [],
       schema: testSchemaArrayOfObjects,
+    },
+    // draft 2020-12
+    {
+      name: "validate prefixItems (draft 2020-12)",
+      mode: MODES.JSON,
+      doc: '{"tuple": ["a", "b"]}',
+      errors: [
+        {
+          from: 16,
+          to: 19,
+          message: "Expected `number` but received `string`",
+        },
+      ],
+      schema: testSchemaDraft2020,
+    },
+    {
+      name: "resolve $defs references (draft 2020-12)",
+      mode: MODES.JSON,
+      doc: '{"item": {}}',
+      errors: [
+        {
+          from: 1,
+          to: 7,
+          message: "The required property `name` is missing at `item`",
+        },
+      ],
+      schema: testSchemaDraft2020,
+    },
+    {
+      name: "reject unevaluated properties (draft 2020-12)",
+      mode: MODES.JSON,
+      doc: '{"extra": 1}',
+      errors: [
+        {
+          from: 1,
+          to: 8,
+          message: "Additional property `extra` is not allowed",
+        },
+      ],
+      schema: testSchemaDraft2020,
+    },
+    {
+      name: "validate dependentRequired (draft 2020-12)",
+      mode: MODES.JSON,
+      doc: '{"credit": "x"}',
+      errors: [
+        {
+          from: 0,
+          to: 0,
+          message: "The required property `email` is missing",
+        },
+      ],
+      schema: testSchemaDraft2020,
+    },
+    {
+      name: "validate formats",
+      mode: MODES.JSON,
+      doc: '{"email": "nope"}',
+      errors: [
+        {
+          from: 10,
+          to: 16,
+          message: "Value `nope` at `email` is not a valid email",
+        },
+      ],
+      schema: testSchemaDraft2020,
     },
   ];
   it.each([

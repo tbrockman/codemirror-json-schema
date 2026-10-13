@@ -7,6 +7,7 @@ import {
   testSchema4,
   testSchemaConditionalProperties,
   testSchemaConditionalPropertiesOnSameObject,
+  testSchemaDraft2020,
   wrappedTestSchemaConditionalPropertiesOnSameObject,
 } from "./__fixtures__/schemas";
 
@@ -395,6 +396,21 @@ describe.each([
       },
     ],
     schema: testSchema4,
+  },
+  {
+    name: "autocomplete for properties behind a $defs reference (draft 2020-12)",
+    mode: MODES.JSON,
+    docs: ['{ "item": { "| } }'],
+    expectedResults: [
+      {
+        type: "property",
+        detail: "string",
+        info: "the name of the item",
+        label: "name",
+        template: '"name": "#{}"',
+      },
+    ],
+    schema: testSchemaDraft2020,
   },
   {
     name: "autocomplete for a schema with conditional properties",

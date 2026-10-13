@@ -22,9 +22,13 @@ import {
   stripSurroundingQuotes,
   surroundingDoubleQuotesToSingle,
 } from "../utils/node";
-import { getJSONSchema } from "./state";
-import type { JsonError, JsonSchema } from "json-schema-library";
-import { Draft07, isJsonError } from "json-schema-library";
+import { compileSchemaCached, getJSONSchema } from "./state";
+import {
+  isJsonError,
+  type JsonError,
+  type JsonSchema,
+  type SchemaNode,
+} from "json-schema-library";
 import {
   jsonPointerForPosition,
   resolveTokenName,
@@ -63,7 +67,6 @@ function isRealSchema(
   return !(
     !subSchema ||
     isJsonError(subSchema) ||
-    subSchema.name === "UnknownPropertyError" ||
     subSchema.type === "undefined"
   );
 }
@@ -891,7 +894,7 @@ export class JSONCompletion {
   ): JSONSchema7Definition[] {
     const { data: documentData } = this.parser(ctx.state);
 
-    const draft = new Draft07(rootSchema);
+    const root = compileSchemaCached(rootSchema);
     let pointer: string | undefined = jsonPointerForPosition(
       ctx.state,
       ctx.pos,
@@ -908,7 +911,7 @@ export class JSONCompletion {
 
       // when adding a new property, we just wanna return the possible properties if possible
       const effectiveSchemaOfPointer = getEffectiveObjectWithPropertiesSchema(
-        rootSchema,
+        root,
         documentData,
         pointer,
       );
@@ -923,7 +926,7 @@ export class JSONCompletion {
 
     // Pass parsed data to getSchema to get the correct schema based on the data context (e.g. for anyOf or if-then)
     const effectiveSchemaOfParent = getEffectiveObjectWithPropertiesSchema(
-      rootSchema,
+      root,
       documentData,
       parentPointer,
     );
@@ -932,11 +935,7 @@ export class JSONCompletion {
       deepestPropertyKey == null ||
       deepestPropertyKey in (effectiveSchemaOfParent?.properties ?? {});
 
-    // TODO upgrade json-schema-library, so this actually returns undefined if data and schema are incompatible (currently it sometimes pukes itself with invalid data and imagines schemas on-the-fly)
-    let subSchema = draft.getSchema({
-      pointer,
-      data: documentData ?? undefined,
-    });
+    let subSchema = getSubSchema(root, pointer, documentData ?? undefined);
     if (
       !pointerPointsToKnownProperty &&
       subSchema?.type === "null" &&
@@ -948,7 +947,7 @@ export class JSONCompletion {
 
     debug.log(
       "xxxx",
-      "draft.getSchema",
+      "getSubSchema",
       subSchema,
       "data",
       documentData,
@@ -970,7 +969,7 @@ export class JSONCompletion {
 
     // then try the parent pointer without data
     if (!isRealSchema(subSchema)) {
-      subSchema = draft.getSchema({ pointer: parentPointer });
+      subSchema = getSubSchema(root, parentPointer, undefined);
       // TODO should probably only change pointer if it actually found a schema there, but i left it as-is
       pointer = parentPointer;
     }
@@ -982,7 +981,6 @@ export class JSONCompletion {
     if (!isRealSchema(subSchema) && (!pointer || pointer === "/")) {
       subSchema = expandSchemaProperty(rootSchema, rootSchema) ?? rootSchema;
     }
-    // const subSchema = new Draft07(this.dirtyCtx.rootSchema).getSchema(pointer);
     debug.log("xxx", "subSchema..", subSchema);
     if (!subSchema) {
       return [];
@@ -1106,22 +1104,17 @@ function makeSchemaLax(schema: any): any {
  * @param pointer
  */
 function getEffectiveObjectWithPropertiesSchema(
-  schema: JSONSchema7,
+  root: SchemaNode,
   data: unknown,
   pointer: string | undefined,
 ): JSONSchema7 | undefined {
-  // TODO (unimportant): [performance] cache Draft07 in case it does some pre-processing? but does not seem to be significant
-  const draft = new Draft07(schema);
-  const subSchema = draft.getSchema({
-    pointer,
-    data: data ?? undefined,
-  });
+  const subSchema = getSubSchema(root, pointer, data ?? undefined);
   if (!isRealSchema(subSchema)) {
     return undefined;
   }
 
   const possibleDirectPropertyNames = getAllPossibleDirectStaticPropertyNames(
-    draft,
+    root.schema as JSONSchema7,
     subSchema as JSONSchema7,
   );
   const effectiveProperties: Exclude<JSONSchema7["properties"], undefined> = {};
@@ -1130,13 +1123,12 @@ function getEffectiveObjectWithPropertiesSchema(
       pointer,
       possibleDirectPropertyName,
     );
-    const subSchemaForPropertyConsideringData = draft.getSchema({
-      // TODO [performance] use subSchema and only check it's sub-properties
-      pointer: propertyPointer,
-      data: data ?? undefined,
-      // pointer: `/${possibleDirectPropertyName}`,
-      // schema: subSchema
-    });
+    // TODO [performance] use subSchema and only check it's sub-properties
+    const subSchemaForPropertyConsideringData = getSubSchema(
+      root,
+      propertyPointer,
+      data ?? undefined,
+    );
     if (isRealSchema(subSchemaForPropertyConsideringData)) {
       Object.assign(effectiveProperties, {
         [possibleDirectPropertyName]: subSchemaForPropertyConsideringData,
@@ -1167,10 +1159,10 @@ function getEffectiveObjectWithPropertiesSchema(
  * @param schema
  */
 function getAllPossibleDirectStaticPropertyNames(
-  rootDraft: Draft07,
+  rootSchema: JSONSchema7,
   schema: JSONSchema7,
 ): string[] {
-  schema = expandSchemaProperty(schema, rootDraft.rootSchema);
+  schema = expandSchemaProperty(schema, rootSchema);
   if (typeof schema !== "object" || schema == null) {
     return [];
   }
@@ -1179,7 +1171,7 @@ function getAllPossibleDirectStaticPropertyNames(
 
   function addFrom(subSchema: JSONSchema7) {
     const possiblePropertyNamesOfSubSchema =
-      getAllPossibleDirectStaticPropertyNames(rootDraft, subSchema);
+      getAllPossibleDirectStaticPropertyNames(rootSchema, subSchema);
     possiblePropertyNames.push(...possiblePropertyNamesOfSubSchema);
   }
 
@@ -1212,7 +1204,9 @@ function expandSchemaProperty<T extends JSONSchema7Definition>(
   rootSchema: JSONSchema7,
 ) {
   if (typeof propertySchema === "object" && propertySchema.$ref) {
-    const refSchema = getReferenceSchema(rootSchema, propertySchema.$ref);
+    const refSchema =
+      getReferenceSchema(rootSchema, propertySchema.$ref) ??
+      compileSchemaCached(rootSchema).getNodeRef(propertySchema.$ref)?.schema;
     if (typeof refSchema === "object") {
       const dereferenced = {
         ...propertySchema,
@@ -1247,4 +1241,18 @@ function getReferenceSchema(schema: JSONSchema7, ref: string) {
 
 function extendJsonPointer(pointer: string | undefined, key: string) {
   return pointer === undefined ? `/${key}` : `${pointer}/${key}`;
+}
+
+/**
+ * Resolve the (data-reduced) sub schema at a json pointer. Returns the json-schema-library
+ * error when the pointer cannot be resolved for the given data, so callers can still
+ * inspect the last schema that could be resolved.
+ */
+function getSubSchema(
+  root: SchemaNode,
+  pointer: string | undefined,
+  data: unknown,
+): JsonSchema | JsonError | undefined {
+  const { node, error } = root.getNode(pointer || "#", data);
+  return node?.schema ?? error;
 }
